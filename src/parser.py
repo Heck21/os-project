@@ -5,7 +5,7 @@ import commands
 
 def parse(full_command: str):
     args = shlex.split(full_command)
-    command = args.pop(0)
+    command = args.pop(0).lower()
 
     match (command):
         case Names.CREATE_FILE.value:

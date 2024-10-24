@@ -5,7 +5,7 @@ def main() -> None:
     while True:
         command = input("> ")
 
-        parser.parse(command.lower().strip())
+        parser.parse(command.strip())
 
 
 if __name__ == "__main__":

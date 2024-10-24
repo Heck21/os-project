@@ -9,35 +9,35 @@ def cf(target: list[str]):
     try:
         subprocess.run(["touch", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def df(target: list[str]):
     try:
         subprocess.run(["rm", "-iv", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def rf(target: list[str]):
     try:
         subprocess.run(["mv", "-iv", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def md(target: list[str]):
     try:
         subprocess.run(["mkdir", "-v", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def dd(target: list[str]):
     try:
         subprocess.run(["rm", "-Ivr", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def cd(target: list[str]):
@@ -52,14 +52,14 @@ def mod(target: list[str]):
     try:
         subprocess.run(["chmod", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def ls(target: list[str]):
     try:
         subprocess.run(["ls", "-la", *target], check=True)
     except subprocess.CalledProcessError as e:
-        print("Error")
+        print(f"Error: {e}")
 
 
 def help():
