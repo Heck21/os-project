@@ -55,15 +55,37 @@ def mod(target: list[str]):
         print(f"Error: {e}")
 
 
-def ls(target: list[str]):
-    try:
-        subprocess.run(["ls", "-la", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+def ls(target: list[str], redirect=False, file=None, mode=None):
+    if redirect:
+        file = Path(str(file))
+        mode = str(mode)
+
+        try:
+            with open(file, mode) as f:
+                subprocess.run(["ls", "-la", *target], stdout=f, check=True)
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            print(f"Error: {e}")
+    else:
+        try:
+            subprocess.run(["ls", "-la", *target], check=True)
+        except subprocess.CalledProcessError as e:
+            print(f"Error: {e}")
 
 
-def help():
-    print("Generic Help Message")
+def help(redirect=False, file=None, mode=None):
+    help_message = "Generic Help Message"
+
+    if redirect:
+        file = Path(str(file))
+        mode = str(mode)
+
+        try:
+            with open(file, mode) as f:
+                f.write(help_message)
+        except FileNotFoundError as e:
+            print(f"Error: {e}")
+    else:
+        print(help_message)
 
 
 def exit():

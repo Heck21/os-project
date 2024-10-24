@@ -1,7 +1,7 @@
 from enum import Enum
+from typing import Mapping
 
-
-class Names(Enum):
+class Names(Mapping):
     CREATE_FILE = "cf"
     DELETE_FILE = "df"
     RENAME_FILE = "rf"
@@ -12,3 +12,7 @@ class Names(Enum):
     LIST_FILES = "ls"
     HELP = "help"
     EXIT = "exit"
+
+class Symbols(Mapping):
+    OVERWRITE_REDIRECT = ">"
+    APPEND_REDIRECT = ">>"
