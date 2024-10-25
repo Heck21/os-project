@@ -7,7 +7,12 @@ def parse(full_command: str):
     args = shlex.split(full_command)
     command = args.pop(0).lower()
 
-    redirectable_commands = [Names.LIST_FILES, Names.HELP]
+    redirectable_commands = [
+        Names.LIST_FILES,
+        Names.SHOW_ALL_ENV,
+        Names.DISPLAY,
+        Names.HELP,
+    ]
 
     if (
         Symbols.OVERWRITE_REDIRECT in args or Symbols.APPEND_REDIRECT in args
@@ -40,6 +45,14 @@ def execute(command: str, args: list[str], redirect=False, file=None, mode=None)
             commands.mod(args)
         case Names.LIST_FILES:
             commands.ls(args, redirect, file, mode)
+        case Names.ADD_ENV_VAR:
+            commands.set(args)
+        case Names.REMOVE_ENV_VAR:
+            commands.unset(args)
+        case Names.SHOW_ALL_ENV:
+            commands.env(redirect, file, mode)
+        case Names.DISPLAY:
+            commands.echo(args, redirect, file, mode)
         case Names.HELP:
             commands.help(redirect, file, mode)
         case Names.EXIT:

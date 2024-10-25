@@ -4,6 +4,8 @@ import os
 
 from pathlib import Path
 
+ORIGINAL_VARS = {x for x in os.environ.keys()}
+
 
 def cf(target: list[str]):
     try:
@@ -56,20 +58,83 @@ def mod(target: list[str]):
 
 
 def ls(target: list[str], redirect=False, file=None, mode=None):
+    try:
+        if redirect:
+            file = Path(str(file))
+            mode = str(mode)
+
+            with open(file, mode) as f:
+                subprocess.run(["ls", "-la", *target], stdout=f, check=True)
+        else:
+            subprocess.run(["ls", "-la", *target], check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+        print(f"Error: {e}")
+
+
+def set(target: list[str]):
+    var, value = target[0].split("=")
+    var = var.strip()
+    value = value.strip()
+
+    try:
+        os.environ[var] = value
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def unset(target: list[str]):
+    var = target[0].strip()
+
+    try:
+        if var in ORIGINAL_VARS:
+            raise ValueError("Cannot unset important variables")
+        else:
+            del os.environ[var]
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+def write_env(output):
+    for key, value in os.environ.items():
+        if key not in ORIGINAL_VARS:
+            output(f"{key}={value}")
+
+
+def env(redirect=False, file=None, mode=None):
     if redirect:
         file = Path(str(file))
         mode = str(mode)
 
         try:
             with open(file, mode) as f:
-                subprocess.run(["ls", "-la", *target], stdout=f, check=True)
-        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                write_env(lambda line: f.write(f"{line}\n"))
+        except FileNotFoundError as e:
             print(f"Error: {e}")
     else:
-        try:
-            subprocess.run(["ls", "-la", *target], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Error: {e}")
+        write_env(print)
+
+
+def expand(args: list[str]):
+    return [
+        os.environ.get(arg.removeprefix("$"), "") if arg.startswith("$") else arg
+        for arg in args
+    ]
+
+
+def echo(target: list[str], redirect=False, file=None, mode=None):
+    vars = expand(target)
+
+    try:
+        if redirect:
+            file = Path(str(file))
+            mode = str(mode)
+
+            with open(file, mode) as f:
+                subprocess.run(["echo", *vars], stdout=f, check=True)
+        else:
+            subprocess.run(["echo", *vars], check=True)
+    except (subprocess.CalledProcessError, KeyError) as e:
+        print(f"Error: {e}")
 
 
 def help(redirect=False, file=None, mode=None):

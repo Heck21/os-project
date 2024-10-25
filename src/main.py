@@ -1,9 +1,19 @@
 import parser
+from pathlib import Path
+
+
+def prompt():
+    full_path = Path.cwd().parts
+
+    if len(full_path) == 1:
+        return f"{full_path[0]}"
+    else:
+        return f"{full_path[0]}../{full_path[-1]}"
 
 
 def main() -> None:
     while True:
-        command = input("> ")
+        command = input(f"{prompt()} > ")
 
         parser.parse(command.strip())
 
