@@ -2,6 +2,7 @@ import subprocess
 import sys
 import os
 
+from textwrap import dedent
 from pathlib import Path
 
 ORIGINAL_VARS = {x for x in os.environ.keys()}
@@ -138,7 +139,23 @@ def echo(target: list[str], redirect=False, file=None, mode=None):
 
 
 def help(redirect=False, file=None, mode=None):
-    help_message = "Generic Help Message"
+    help_message = """
+    cwsh, version 1.0.0
+
+    cf <file>                       - Create <file>
+    df <file>                       - Delete <file>
+    rf <file>                       - Rename <file>
+    md <dir>                        - Create <dir>
+    dd <dir>                        - Delete <dir>
+    cd <dir>                        - Change working directory to <dir>
+    mod [ugoa][-+=][rwx] <file>     - Change permission of <file>
+    ls <dir>                        - List all content in <dir>
+    set [<name>=<value>]            - Add environment variable <name> as <value>
+    unset <name>                    - Remove environment variable <name>
+    env                             - Show all environment variables
+    echo [<value> ...]              - Display <value>
+    exit                            - Close shell
+    """
 
     if redirect:
         file = Path(str(file))
@@ -146,11 +163,11 @@ def help(redirect=False, file=None, mode=None):
 
         try:
             with open(file, mode) as f:
-                f.write(help_message)
+                f.write(dedent(help_message))
         except FileNotFoundError as e:
             print(f"Error: {e}")
     else:
-        print(help_message)
+        print(dedent(help_message))
 
 
 def exit():

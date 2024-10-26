@@ -58,7 +58,7 @@ def execute(command: str, args: list[str], redirect=False, file=None, mode=None)
         case Names.EXIT:
             commands.exit()
         case _:
-            print("Unknown Command.")
+            print("Unknown command. Type 'help' to see list of commands.")
 
 
 def execute_with_redirect(command: str, args: list[str], mode: str):
