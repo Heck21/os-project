@@ -17,7 +17,7 @@ def cf(target: list[str]):
 
         subprocess.run(["touch", *target], stderr=subprocess.DEVNULL, check=True)
     except subprocess.CalledProcessError:
-        print("cf: Permission denied")
+        print("cf: Something went wrong")
     except ShellError:
         print("cf: Incorrect syntax. Type 'help' to see correct syntax")
 
@@ -108,16 +108,67 @@ def cd(target: list[str]):
         print(f"cd: {new_path.name}: Permission denied")
 
 
+def changes():
+    subjects = {"u", "g", "o", "a"}
+    modifications = {"+", "-"}
+    actions = {"r", "w", "x"}
+
+    while True:
+        subject = input("Subjects to change (u, g, o, a): ").lower()
+
+        for letter in subject:
+            if letter in subjects:
+                valid = True
+
+        if valid:
+            break
+        else:
+            print("Invalid entry")
+
+    while True:
+        modification = input("Add or remove permissions (+, -): ")
+
+        if modification not in modifications:
+            print("Invalid entry")
+        else:
+            break
+
+    while True:
+        action = input("What permissions to change (r, w, x): ").lower()
+
+        for letter in action:
+            if letter in actions:
+                valid = True
+
+        if valid:
+            break
+        else:
+            print("Invalid entry")
+
+    return f"{subject}{modification}{action}"
+
+
 def mod(target: list[str]):
     try:
-        subprocess.run(["chmod", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        if len(target) != 1:
+            raise ShellError
+
+        arg = Path(*target).resolve(strict=True)
+
+        change = changes()
+
+        subprocess.run(["chmod", change, arg], check=True)
+    except subprocess.CalledProcessError:
+        print("mod: Something went wrong")
+    except FileNotFoundError:
+        print("mod: No such file or directory")
+    except ShellError:
+        print("mod: Incorrect syntax. Type 'help' to see correct syntax")
 
 
 def ls(target: list[str], redirect=False, file=None, mode=None):
     try:
-        if len(target) != 1:
+        if len(target) > 1:
             raise ShellError
 
         directory = Path(*target).resolve(strict=True)
@@ -135,7 +186,7 @@ def ls(target: list[str], redirect=False, file=None, mode=None):
     except FileNotFoundError:
         print("ls: No such directory")
     except ShellError:
-        print("Incorrect syntax. Type 'help' to see correct syntax")
+        print("ls: Incorrect syntax. Type 'help' to see correct syntax")
 
 
 def set(target: list[str]):
@@ -204,8 +255,8 @@ def echo(target: list[str], redirect=False, file=None, mode=None):
                 subprocess.run(["echo", *vars], stdout=f, check=True)
         else:
             subprocess.run(["echo", *vars], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+    except subprocess.CalledProcessError:
+        print("echo: Something went wrong")
 
 
 def help(redirect=False, file=None, mode=None):
@@ -218,7 +269,7 @@ def help(redirect=False, file=None, mode=None):
     md <dir>                        - Create <dir>
     dd <dir>                        - Delete <dir>
     cd <dir>                        - Change working directory to <dir>
-    mod [ugoa][-+=][rwx] <file>     - Change permission of <file>
+    mod <file>                      - Change permission of <file>
     ls <dir>                        - List all content in <dir>
     set [<name>=<value>]            - Add environment variable <name> as <value>
     unset <name>                    - Remove environment variable <name>
