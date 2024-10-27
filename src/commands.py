@@ -12,9 +12,14 @@ ORIGINAL_VARS = {x for x in os.environ.keys()}
 
 def cf(target: list[str]):
     try:
-        subprocess.run(["touch", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        if len(target) != 1:
+            raise ShellError
+
+        subprocess.run(["touch", *target], stderr=subprocess.DEVNULL, check=True)
+    except subprocess.CalledProcessError:
+        print("cf: Permission denied")
+    except ShellError:
+        print("cf: Incorrect syntax. Type 'help' to see correct syntax")
 
 
 def df(target: list[str]):
@@ -51,6 +56,8 @@ def cd(target: list[str]):
         os.chdir(new_path)
     except FileNotFoundError:
         print(f"cd: {new_path.name}: No such file or directory")
+    except PermissionError:
+        print(f"cd: {new_path.name}: Permission denied")
 
 
 def mod(target: list[str]):
