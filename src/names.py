@@ -18,3 +18,7 @@ class Names:
 class Symbols:
     OVERWRITE_REDIRECT = ">"
     APPEND_REDIRECT = ">>"
+
+
+class ShellError(Exception):
+    pass

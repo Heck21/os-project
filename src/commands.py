@@ -5,6 +5,8 @@ import os
 from textwrap import dedent
 from pathlib import Path
 
+from names import ShellError
+
 ORIGINAL_VARS = {x for x in os.environ.keys()}
 
 
@@ -47,8 +49,8 @@ def cd(target: list[str]):
     try:
         new_path = Path(*target).resolve()
         os.chdir(new_path)
-    except Exception as e:
-        print(f"Error: {e}")
+    except FileNotFoundError:
+        print(f"cd: {new_path.name}: No such file or directory")
 
 
 def mod(target: list[str]):
@@ -68,19 +70,24 @@ def ls(target: list[str], redirect=False, file=None, mode=None):
                 subprocess.run(["ls", "-la", *target], stdout=f, check=True)
         else:
             subprocess.run(["ls", "-la", *target], check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError) as e:
+    except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
 
 
 def set(target: list[str]):
-    var, value = target[0].split("=")
-    var = var.strip()
-    value = value.strip()
-
     try:
+        var, value = target[0].split("=")
+        var = var.strip()
+        value = value.strip()
+
+        if var in ORIGINAL_VARS:
+            raise ShellError
+
         os.environ[var] = value
-    except Exception as e:
-        print(f"Error: {e}")
+    except ValueError:
+        print("set: Incorrect syntax. Type 'help' to see correct syntax")
+    except ShellError:
+        print("set: Cannot overwrite important variable")
 
 
 def unset(target: list[str]):
@@ -88,11 +95,13 @@ def unset(target: list[str]):
 
     try:
         if var in ORIGINAL_VARS:
-            raise ValueError("Cannot unset important variables")
-        else:
-            del os.environ[var]
-    except Exception as e:
-        print(f"Error: {e}")
+            raise ShellError
+
+        del os.environ[var]
+    except KeyError:
+        print("unset: Variable not found")
+    except ShellError:
+        print("unset: Cannot unset important variable")
 
 
 def write_env(output):
@@ -106,11 +115,8 @@ def env(redirect=False, file=None, mode=None):
         file = Path(str(file))
         mode = str(mode)
 
-        try:
-            with open(file, mode) as f:
-                write_env(lambda line: f.write(f"{line}\n"))
-        except FileNotFoundError as e:
-            print(f"Error: {e}")
+        with open(file, mode) as f:
+            write_env(lambda line: f.write(f"{line}\n"))
     else:
         write_env(print)
 
@@ -134,7 +140,7 @@ def echo(target: list[str], redirect=False, file=None, mode=None):
                 subprocess.run(["echo", *vars], stdout=f, check=True)
         else:
             subprocess.run(["echo", *vars], check=True)
-    except (subprocess.CalledProcessError, KeyError) as e:
+    except subprocess.CalledProcessError as e:
         print(f"Error: {e}")
 
 
@@ -161,11 +167,8 @@ def help(redirect=False, file=None, mode=None):
         file = Path(str(file))
         mode = str(mode)
 
-        try:
-            with open(file, mode) as f:
-                f.write(dedent(help_message))
-        except FileNotFoundError as e:
-            print(f"Error: {e}")
+        with open(file, mode) as f:
+            f.write(dedent(help_message))
     else:
         print(dedent(help_message))
 
