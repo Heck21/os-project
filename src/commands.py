@@ -24,30 +24,78 @@ def cf(target: list[str]):
 
 def df(target: list[str]):
     try:
-        subprocess.run(["rm", "-iv", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        if len(target) != 1:
+            raise ShellError
+
+        subprocess.run(["rm", "-f", *target], stderr=subprocess.DEVNULL, check=True)
+    except subprocess.CalledProcessError:
+        print("df: Cannot remove a directory")
+    except ShellError:
+        print("df: Incorrect syntax. Type 'help' to see correct syntax")
 
 
 def rf(target: list[str]):
     try:
-        subprocess.run(["mv", "-iv", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        if len(target) != 2:
+            raise ShellError("Incorrect syntax. Type 'help' to see correct syntax")
+
+        old, new = target
+
+        old = Path(old).resolve(strict=True)
+        new = Path(new).resolve()
+
+        if old.is_dir():
+            raise ShellError("Cannot apply command with directory")
+
+        if old == new:
+            raise ShellError(f"'{old.name}' and '{new.name}' are the same file")
+
+        subprocess.run(["mv", "-T", old, new], stderr=subprocess.DEVNULL, check=True)
+    except subprocess.CalledProcessError:
+        print("rf: Cannot apply command with directory")
+    except FileNotFoundError:
+        print("rf: No such file")
+    except ShellError as e:
+        print(f"rf: {e}")
 
 
 def md(target: list[str]):
     try:
-        subprocess.run(["mkdir", "-v", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        if len(target) != 1:
+            raise ShellError("Incorrect syntax. Type 'help' to see correct syntax")
+
+        new_dir = Path(*target).resolve()
+
+        if new_dir.exists():
+            raise ShellError("Directory already exists")
+
+        subprocess.run(["mkdir", *target], stderr=subprocess.DEVNULL, check=True)
+    except (subprocess.CalledProcessError, PermissionError):
+        print("md: Permission denied")
+    except ShellError as e:
+        print(f"md: {e}")
 
 
 def dd(target: list[str]):
     try:
-        subprocess.run(["rm", "-Ivr", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+        if len(target) != 1:
+            raise ShellError("Incorrect syntax. Type 'help' to see correct syntax")
+
+        directory = Path(*target).resolve(strict=True)
+
+        if directory.is_file():
+            raise ShellError("Cannot remove a file")
+
+        if directory == Path("/"):
+            raise PermissionError
+
+        subprocess.run(["rm", "-rf", directory], stderr=subprocess.DEVNULL)
+    except FileNotFoundError:
+        print("dd: No such directory")
+    except PermissionError:
+        print("dd: Permission denied")
+    except ShellError as e:
+        print(f"dd: {e}")
 
 
 def cd(target: list[str]):
@@ -55,7 +103,7 @@ def cd(target: list[str]):
         new_path = Path(*target).resolve()
         os.chdir(new_path)
     except FileNotFoundError:
-        print(f"cd: {new_path.name}: No such file or directory")
+        print(f"cd: {new_path.name}: No such directory")
     except PermissionError:
         print(f"cd: {new_path.name}: Permission denied")
 
@@ -69,16 +117,25 @@ def mod(target: list[str]):
 
 def ls(target: list[str], redirect=False, file=None, mode=None):
     try:
+        if len(target) != 1:
+            raise ShellError
+
+        directory = Path(*target).resolve(strict=True)
+
         if redirect:
             file = Path(str(file))
             mode = str(mode)
 
             with open(file, mode) as f:
-                subprocess.run(["ls", "-la", *target], stdout=f, check=True)
+                subprocess.run(["ls", "-la", directory], stdout=f, check=True)
         else:
-            subprocess.run(["ls", "-la", *target], check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error: {e}")
+            subprocess.run(["ls", "-la", directory], check=True)
+    except subprocess.CalledProcessError:
+        print("ls: Permission denied")
+    except FileNotFoundError:
+        print("ls: No such directory")
+    except ShellError:
+        print("Incorrect syntax. Type 'help' to see correct syntax")
 
 
 def set(target: list[str]):
