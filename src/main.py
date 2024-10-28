@@ -1,5 +1,6 @@
-import parser
 from pathlib import Path
+
+import parser
 
 
 def prompt():

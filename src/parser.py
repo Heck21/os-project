@@ -1,18 +1,19 @@
 import shlex
-from names import Names, Symbols
+
 import commands
+from utility import Names, Symbols
+
+redirectable_commands = {
+    Names.LIST_FILES,
+    Names.SHOW_ALL_ENV,
+    Names.DISPLAY,
+    Names.HELP,
+}
 
 
-def parse(full_command: str):
+def parse(full_command: str) -> None:
     args = shlex.split(full_command)
     command = args.pop(0).lower()
-
-    redirectable_commands = [
-        Names.LIST_FILES,
-        Names.SHOW_ALL_ENV,
-        Names.DISPLAY,
-        Names.HELP,
-    ]
 
     if (
         Symbols.OVERWRITE_REDIRECT in args or Symbols.APPEND_REDIRECT in args
@@ -27,7 +28,9 @@ def parse(full_command: str):
         execute(command, args)
 
 
-def execute(command: str, args: list[str], redirect=False, file=None, mode=None):
+def execute(
+    command: str, args: list[str], redirect=False, file=None, mode=None
+) -> None:
     match (command):
         case Names.CREATE_FILE:
             commands.cf(args)
@@ -61,7 +64,7 @@ def execute(command: str, args: list[str], redirect=False, file=None, mode=None)
             print("Unknown command. Type 'help' to see list of commands.")
 
 
-def execute_with_redirect(command: str, args: list[str], mode: str):
+def execute_with_redirect(command: str, args: list[str], mode: str) -> None:
     output_file = args.pop()
 
     if mode == "w":
