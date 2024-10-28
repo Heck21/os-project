@@ -18,6 +18,6 @@ This is a custom shell implementation for Linux. Commands for the following func
 
 ```sh
 git clone https://github.com/Heck21/os-project.git
-cd cwsh/src/
+cd src/
 python main.py
 ```
