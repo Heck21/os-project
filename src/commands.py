@@ -30,9 +30,13 @@ def df(args: list[str]) -> None:
         if len(args) != 1:
             raise ShellError
 
-        subprocess.run(["rm", "-f", *args], stderr=subprocess.DEVNULL, check=True)
+        file = Path(*args).resolve(strict=True)
+
+        subprocess.run(["rm", "-f", file], stderr=subprocess.DEVNULL, check=True)
     except subprocess.CalledProcessError:
         print("df: Cannot remove a directory")
+    except FileNotFoundError:
+        print("df: No such file")
     except ShellError:
         print("df: Incorrect syntax. Type 'help' to see correct syntax")
 
@@ -172,7 +176,7 @@ def mod(args: list[str]) -> None:
 
         change = changes()
 
-        subprocess.run(["chmod", change, arg], check=True)
+        subprocess.run(["chmod", change, arg], stderr=subprocess.DEVNULL, check=True)
     except subprocess.CalledProcessError:
         print("mod: Something went wrong")
     except FileNotFoundError:
@@ -195,13 +199,22 @@ def ls(args: list[str], redirect: bool = False, file=None, mode=None) -> None:
             mode = str(mode)
 
             with open(file, mode) as f:
-                subprocess.run(["ls", "-la", directory], stdout=f, check=True)
+                subprocess.run(
+                    ["ls", "-la", directory],
+                    stdout=f,
+                    stderr=subprocess.DEVNULL,
+                    check=True,
+                )
         else:
-            subprocess.run(["ls", "-la", directory], check=True)
+            subprocess.run(
+                ["ls", "-la", directory], stderr=subprocess.DEVNULL, check=True
+            )
     except subprocess.CalledProcessError:
         print("ls: Permission denied")
     except FileNotFoundError:
         print("ls: No such directory")
+    except PermissionError:
+        print("-cwsh: Permission denied")
     except ShellError:
         print("ls: Incorrect syntax. Type 'help' to see correct syntax")
 
@@ -251,14 +264,17 @@ def write_env(output) -> None:
 def env(redirect: bool = False, file=None, mode=None) -> None:
     """Executes the 'show environment variables' command."""
 
-    if redirect:
-        file = Path(str(file))
-        mode = str(mode)
+    try:
+        if redirect:
+            file = Path(str(file))
+            mode = str(mode)
 
-        with open(file, mode) as f:
-            write_env(lambda line: f.write(f"{line}\n"))
-    else:
-        write_env(print)
+            with open(file, mode) as f:
+                write_env(lambda line: f.write(f"{line}\n"))
+        else:
+            write_env(print)
+    except PermissionError:
+        print("-cwsh: Permission denied")
 
 
 def expand(args: list[str]) -> list[str]:
@@ -286,6 +302,8 @@ def echo(args: list[str], redirect: bool = False, file=None, mode=None) -> None:
             subprocess.run(["echo", *vars], check=True)
     except subprocess.CalledProcessError:
         print("echo: Something went wrong")
+    except PermissionError:
+        print("-cwsh: Permission denied")
 
 
 def help(redirect=False, file=None, mode=None) -> None:
@@ -309,14 +327,17 @@ def help(redirect=False, file=None, mode=None) -> None:
     exit                            - Close shell
     """
 
-    if redirect:
-        file = Path(str(file))
-        mode = str(mode)
+    try:
+        if redirect:
+            file = Path(str(file))
+            mode = str(mode)
 
-        with open(file, mode) as f:
-            f.write(dedent(help_message))
-    else:
-        print(dedent(help_message))
+            with open(file, mode) as f:
+                f.write(dedent(help_message))
+        else:
+            print(dedent(help_message))
+    except PermissionError:
+        print("-cwsh: Permission denied")
 
 
 def exit():
