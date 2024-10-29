@@ -1,3 +1,5 @@
+\* - Supports output redirection.
+
 # File Management
 
 ## Create File
@@ -40,21 +42,21 @@
 
 `unset` `<name>`
 
-## Show All Variables
+## Show All Variables *
 
 `env`
 
 # Other
 
-## Show All Files
+## Show All Files *
 
 `ls` `[<directory>]`
 
-## Display
+## Display *
 
 `echo` `<argument ...>`
 
-## Show Help Message
+## Show Help Message *
 
 `help`
 

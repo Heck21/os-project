@@ -57,3 +57,7 @@
 `echo Hello World.`
 
 `echo $GREETING user.`
+
+# Redirection
+
+`ls > files.txt`
