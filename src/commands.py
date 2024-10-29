@@ -10,6 +10,8 @@ ORIGINAL_VARS = {x for x in os.environ.keys()}
 
 
 def cf(args: list[str]) -> None:
+    """Executes the 'create file' command."""
+
     try:
         if len(args) != 1:
             raise ShellError
@@ -22,6 +24,8 @@ def cf(args: list[str]) -> None:
 
 
 def df(args: list[str]) -> None:
+    """Executes the 'delete file' command."""
+
     try:
         if len(args) != 1:
             raise ShellError
@@ -34,6 +38,8 @@ def df(args: list[str]) -> None:
 
 
 def rf(args: list[str]) -> None:
+    """Executes the 'rename file' command."""
+
     try:
         if len(args) != 2:
             raise ShellError("Incorrect syntax. Type 'help' to see correct syntax")
@@ -59,6 +65,8 @@ def rf(args: list[str]) -> None:
 
 
 def md(args: list[str]) -> None:
+    """Executes the 'create directory' command."""
+
     try:
         if len(args) != 1:
             raise ShellError("Incorrect syntax. Type 'help' to see correct syntax")
@@ -76,6 +84,8 @@ def md(args: list[str]) -> None:
 
 
 def dd(args: list[str]) -> None:
+    """Executes the 'delete directory' command."""
+
     try:
         if len(args) != 1:
             raise ShellError("Incorrect syntax. Type 'help' to see correct syntax")
@@ -98,6 +108,8 @@ def dd(args: list[str]) -> None:
 
 
 def cd(args: list[str]) -> None:
+    """Executes the 'change directory' command."""
+
     try:
         new_path = Path(*args).resolve()
         os.chdir(new_path)
@@ -108,6 +120,8 @@ def cd(args: list[str]) -> None:
 
 
 def changes() -> str:
+    """Prompts the user to specify subjects, modifications, and actions for permission changes."""
+
     subjects = {"u", "g", "o", "a"}
     modifications = {"+", "-"}
     actions = {"r", "w", "x"}
@@ -148,6 +162,8 @@ def changes() -> str:
 
 
 def mod(args: list[str]) -> None:
+    """Executes the 'modify permissions' command."""
+
     try:
         if len(args) != 1:
             raise ShellError
@@ -165,7 +181,9 @@ def mod(args: list[str]) -> None:
         print("mod: Incorrect syntax. Type 'help' to see correct syntax")
 
 
-def ls(args: list[str], redirect=False, file=None, mode=None) -> None:
+def ls(args: list[str], redirect: bool = False, file=None, mode=None) -> None:
+    """Executes the 'list directory content' command."""
+
     try:
         if len(args) > 1:
             raise ShellError
@@ -189,6 +207,8 @@ def ls(args: list[str], redirect=False, file=None, mode=None) -> None:
 
 
 def set(args: list[str]) -> None:
+    """Executes the 'add environment variable' command."""
+
     try:
         var, value = args[0].split("=")
         var = var.strip()
@@ -205,6 +225,8 @@ def set(args: list[str]) -> None:
 
 
 def unset(args: list[str]) -> None:
+    """Executes the 'remove environment variable' command."""
+
     var = args[0].strip()
 
     try:
@@ -219,12 +241,16 @@ def unset(args: list[str]) -> None:
 
 
 def write_env(output) -> None:
+    """Writes environment variables to the given output."""
+
     for key, value in os.environ.items():
         if key not in ORIGINAL_VARS:
             output(f"{key}={value}")
 
 
-def env(redirect=False, file=None, mode=None) -> None:
+def env(redirect: bool = False, file=None, mode=None) -> None:
+    """Executes the 'show environment variables' command."""
+
     if redirect:
         file = Path(str(file))
         mode = str(mode)
@@ -236,13 +262,17 @@ def env(redirect=False, file=None, mode=None) -> None:
 
 
 def expand(args: list[str]) -> list[str]:
+    """Expands environment variables in the given list of arguments."""
+
     return [
         os.environ.get(arg.removeprefix("$"), "") if arg.startswith("$") else arg
         for arg in args
     ]
 
 
-def echo(args: list[str], redirect=False, file=None, mode=None) -> None:
+def echo(args: list[str], redirect: bool = False, file=None, mode=None) -> None:
+    """Executes the 'display' command."""
+
     vars = expand(args)
 
     try:
@@ -259,21 +289,23 @@ def echo(args: list[str], redirect=False, file=None, mode=None) -> None:
 
 
 def help(redirect=False, file=None, mode=None) -> None:
+    """Displays help message."""
+
     help_message = """
     cwsh, version 1.0.0
 
-    cf <file>                       - Create <file>
-    df <file>                       - Delete <file>
-    rf <file>                       - Rename <file>
-    md <dir>                        - Create <dir>
-    dd <dir>                        - Delete <dir>
-    cd <dir>                        - Change working directory to <dir>
-    mod <file>                      - Change permission of <file>
-    ls <dir>                        - List all content in <dir>
-    set [<name>=<value>]            - Add environment variable <name> as <value>
-    unset <name>                    - Remove environment variable <name>
+    cf <file>                       - Create file
+    df <file>                       - Delete file
+    rf <old_name> <new_name>        - Rename file
+    md <directory>                  - Create directory
+    dd <directory>                  - Delete directory
+    cd <directory>                  - Change working directory
+    mod <file / directory>          - Change permission of file or directory
+    ls [<directory>]                - List all content in directory
+    set <name>=<value>              - Add environment variable
+    unset <name>                    - Remove environment variable
     env                             - Show all environment variables
-    echo [<value> ...]              - Display <value>
+    echo <argument ...>             - Display
     exit                            - Close shell
     """
 

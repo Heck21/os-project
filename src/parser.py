@@ -11,8 +11,10 @@ redirectable_commands = {
 }
 
 
-def parse(full_command: str) -> None:
-    args = shlex.split(full_command)
+def parse(user_input: str) -> None:
+    """Parses and prepares input from user to be executed."""
+
+    args = shlex.split(user_input)
     command = args.pop(0).lower()
 
     if (
@@ -29,8 +31,14 @@ def parse(full_command: str) -> None:
 
 
 def execute(
-    command: str, args: list[str], redirect=False, file=None, mode=None
+    command: str,
+    args: list[str],
+    redirect: bool = False,
+    file: str | None = None,
+    mode: str | None = None,
 ) -> None:
+    """Executes a specified command."""
+
     match (command):
         case Names.CREATE_FILE:
             commands.cf(args)
@@ -65,6 +73,8 @@ def execute(
 
 
 def execute_with_redirect(command: str, args: list[str], mode: str) -> None:
+    """Executes a specified command if redirection is needed."""
+
     output_file = args.pop()
 
     if mode == "w":

@@ -1,9 +1,11 @@
 from pathlib import Path
 
-import parser
+from parser import parse
 
 
-def prompt():
+def prompt() -> str:
+    """Generates shortened path to current directory that is shown at prompt."""
+
     full_path = Path.cwd().parts
 
     if len(full_path) == 1:
@@ -14,9 +16,9 @@ def prompt():
 
 def main() -> None:
     while True:
-        command = input(f"{prompt()} > ")
+        user_input = input(f"{prompt()} > ")
 
-        parser.parse(command.strip())
+        parse(user_input.strip())
 
 
 if __name__ == "__main__":
