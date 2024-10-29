@@ -24,4 +24,4 @@ python main.py
 
 # Getting Started
 
-See [commands.md](commands.md) for a list of commands and [examples.md](examples.md) for some examples on how each command can be used.
+See [commands.md](docs/commands.md) for a list of commands and [examples.md](docs/examples.md) for some examples on how each command can be used.
